@@ -1,6 +1,8 @@
 from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class Settings(BaseSettings):
     MODE: Literal["TEST", "LOCAL", "DEV", "PROD"]
@@ -9,6 +11,12 @@ class Settings(BaseSettings):
 
     APP_NAME: str
     DEVELOPER: str
+
+    DATABASE_URL: str
+    PAYMENT_API_URL: str
+    PROTECTION_API_URL: str
+    BOOKING_TTL_MINUTES: int
+
 
     model_config = SettingsConfigDict(env_file=".env")
 
