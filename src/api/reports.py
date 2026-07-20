@@ -19,7 +19,7 @@ router = APIRouter(prefix="/reports", tags=["Отчёты"])
     response_model=JobStatusResponse,
 )
 async def get_user_report(
-    user_id: int = Path(example=1, description="ID задачи", ge=1, le=208),
+    user_id: int = Path(example=1, description="ID задачи", ge=1, le=208),  # noqa
 ):
     try:
         return await JobService().create_job(user_id)
@@ -33,7 +33,7 @@ async def get_user_report(
     description="<h3>Этот метод возвращает статус задачи<h3>",
     response_model=JobResult,
 )
-async def get_status_job(job_id: int = Path(example=1, description="ID задачи", ge=1)):
+async def get_status_job(job_id: int = Path(example=1, description="ID задачи", ge=1)):  # noqa
     try:
         return await JobService().get_job(job_id)
     except JobNotFoundException:

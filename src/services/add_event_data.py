@@ -56,5 +56,3 @@ async def add_event_data_to_db() -> None:
             )
 
     print("Тестовые данные созданы")
-
-

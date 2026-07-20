@@ -16,6 +16,10 @@ class UserNotFoundException(NakodilException):
     detail = "Пользователь не найдена"
 
 
+class SeatsConflictException(NakodilException):
+    detail = "Места уже забронированы"
+
+
 class NakodilHTTPException(HTTPException):
     status_code = 500
     detail = None
@@ -32,3 +36,8 @@ class JobNotFoundHTTPException(NakodilHTTPException):
 class UserNotFoundHTTPException(NakodilHTTPException):
     status_code = 404
     detail = "Пользователь не найдена"
+
+
+class SeatsConflictHTTPException(NakodilHTTPException):
+    status_code = 409
+    detail = "Места уже забронированы"

@@ -1,4 +1,6 @@
 from repositories.events import EventsRepository
+from repositories.bookings import BookingsRepository
+from repositories.seats import SeatsRepository, EventsSeatsRepository
 
 
 class DBManager:
@@ -13,6 +15,9 @@ class DBManager:
         self.session = self.session_factory()
 
         self.events = EventsRepository(self.session)
+        self.bookings = BookingsRepository(self.session)
+        self.seats = SeatsRepository(self.session)
+        self.events_seats = EventsSeatsRepository(self.session)
 
         return self
 

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Settings(BaseSettings):
     MODE: Literal["TEST", "LOCAL", "DEV", "PROD"]
 
@@ -17,8 +18,12 @@ class Settings(BaseSettings):
     PROTECTION_API_URL: str
     BOOKING_TTL_MINUTES: int
 
+    RESERVATION_MINUTES: int
+
+    PAYMENT_TIMEOUT: float
+    PROTECTION_TIMEOUT: float
 
     model_config = SettingsConfigDict(env_file=".env")
 
 
-settings = Settings() # type: ignore[call-arg]
+settings = Settings()  # type: ignore[call-arg]

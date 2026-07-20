@@ -53,6 +53,7 @@ if context.is_offline_mode():
 else:
     import asyncio
     import sys
+
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(run_async_migrations())

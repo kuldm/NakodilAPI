@@ -1,23 +1,19 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, status
-import httpx
+from fastapi import APIRouter, Depends, Header
 
-from api.dependencies import DBDep
-from schemas.schemas import (
-    BookingCreate,
-    CheckoutResponse,
+from schemas.events import (
     EventCreate,
-    EventDashboard,
     EventRead,
-    EventSeatRead,
+)
+from schemas.schemas import (
+    EventDashboard,
     LocationDetail,
     LocationRead,
     PaymentCompleted,
     PaymentCreate,
     SeatRead,
 )
-from services.events import EventsService
 
 router = APIRouter()
 
@@ -47,32 +43,6 @@ async def list_location_seats(location_id: int) -> list[SeatRead]:
     ...
 
 
-@router.get(
-    "/events",
-    summary="Список мероприятий",
-    description="<h3>Этот метод возвращает список мероприятий для клиента<h3>",
-    response_model=list[EventRead],
-)
-async def list_events(
-        db: DBDep,
-):
-    events = await EventsService(db).get_all_events()
-    return events
-
-
-
-@router.get("/events/{event_id}")
-async def get_event(event_id: int) -> EventRead:
-    """Возвращает описание мероприятия."""
-    ...
-
-
-@router.get("/events/{event_id}/seats")
-async def list_event_seats(event_id: int) -> list[EventSeatRead]:
-    """Возвращает места на мероприятии с ценами и статусами."""
-    ...
-
-
 @router.get("/organizer/events")
 async def list_organizer_events(organizer_id: CurrentUserId) -> list[EventRead]:
     """Возвращает список созданных событий текущего организатора."""
@@ -86,27 +56,12 @@ async def create_event(payload: EventCreate, organizer_id: CurrentUserId) -> Eve
 
 
 @router.get("/organizer/events/{event_id}/dashboard")
-async def get_event_dashboard(event_id: int, organizer_id: CurrentUserId) -> EventDashboard:
+async def get_event_dashboard(
+    event_id: int, organizer_id: CurrentUserId
+) -> EventDashboard:
     """Возвращает аналитические данные для дашборда по мероприятию."""
     # TODO: проверить, что мероприятие принадлежит organizer_id.
     # TODO: конкурентно загрузить аналитику продаж и занятость мест отдельными запросами к БД.
-    ...
-
-
-@router.post(
-    "/events/{event_id}/checkout",
-    summary="Временно бронирует места",
-    description="<h3>Этот метод Временно бронирует места за клиентом, возвращает итоговую стоимость и возможность страховки<h3>",
-    response_model=CheckoutResponse,
-)
-async def prepare_checkout(
-    event_id: int,
-    payload: BookingCreate,
-    user_id: CurrentUserId,
-):
-
-    # TODO: создать бронь для выбранных мест через SELECT FOR UPDATE, и посчитать базовую стоимость.
-    # TODO: конкурентно запросить Payment API и Protection API для расчета checkout.
     ...
 
 

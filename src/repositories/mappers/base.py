@@ -21,4 +21,3 @@ class DataMapper:
     @classmethod
     def map_to_persistence_entity(cls, data):
         return cls.db_model(**data.model_dump())
-

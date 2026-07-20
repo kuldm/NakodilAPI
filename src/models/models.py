@@ -38,7 +38,9 @@ class Seat(Base):
 
     __tablename__ = "seats"
     __table_args__ = (
-        UniqueConstraint("location_id", "sector", "row", "number", name="uq_seat_position"),
+        UniqueConstraint(
+            "location_id", "sector", "row", "number", name="uq_seat_position"
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -52,7 +54,7 @@ class Seat(Base):
 
 class Event(Base):
     """Мероприятие с датой, площадкой и базовой ценой. Создается организатором.
-        Например: Концерт Аллы Пугачевой, Мастер-класс по Python."""
+    Например: Концерт Аллы Пугачевой, Мастер-класс по Python."""
 
     __tablename__ = "events"
 
@@ -91,9 +93,7 @@ class EventSeat(Base):
     """Место конкретного мероприятия с ценой и статусом."""
 
     __tablename__ = "event_seats"
-    __table_args__ = (
-        UniqueConstraint("event_id", "seat_id", name="uq_event_seat"),
-    )
+    __table_args__ = (UniqueConstraint("event_id", "seat_id", name="uq_event_seat"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), index=True)
