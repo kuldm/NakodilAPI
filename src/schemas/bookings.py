@@ -32,6 +32,7 @@ class BookingAdd(BaseModel):
     status: BookingStatus = BookingStatus.pending_payment
     reserved_until: datetime
 
+
 class BookingRead(BaseModel):
     id: int
     event_id: int

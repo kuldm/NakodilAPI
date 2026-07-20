@@ -7,7 +7,6 @@ from dishka import make_async_container
 from dishka.integrations.fastapi import FastapiProvider, setup_dishka
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio
 
 
 from services.add_event_data import add_event_data_to_db

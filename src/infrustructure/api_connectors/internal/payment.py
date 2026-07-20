@@ -1,4 +1,3 @@
-from typing import List
 
 from infrustructure.api_connectors.base import BaseHTTPConnector
 from infrustructure.api_connectors.schemas import (
@@ -27,7 +26,11 @@ class PaymentConnector(BaseHTTPConnector):
         data: PaymentCalculateItemData,
     ) -> PaymentCalculateData:
         response = await self._request(
-            "POST", "/payment/calculate", json=data.model_dump(), retry=True, retry_count=2
+            "POST",
+            "/payment/calculate",
+            json=data.model_dump(),
+            retry=True,
+            retry_count=2,
         )
         response.raise_for_status()
         return PaymentCalculateData.model_validate(response.json())

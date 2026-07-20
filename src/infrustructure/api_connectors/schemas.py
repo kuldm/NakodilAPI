@@ -24,9 +24,7 @@ class ProtectionCalculateItemData(BaseModel):
     booking_id: int
     ticket_amount: int = Field(description="Стоимость билетов в копейках")
     event_category: str = Field(description="Категория мероприятия")
-    event_starts_at: str = Field(
-        description="Дата начала мероприятия в ISO-формате"
-    )
+    event_starts_at: str = Field(description="Дата начала мероприятия в ISO-формате")
 
     model_config = ConfigDict(frozen=True)
 

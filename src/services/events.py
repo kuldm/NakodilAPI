@@ -3,7 +3,6 @@ import random
 from datetime import datetime, timedelta, timezone
 
 import httpx
-from tenacity import retry
 
 from config import settings
 from exceptions import SeatsConflictException
@@ -16,7 +15,6 @@ from schemas.bookings import BookingCreate, BookingAdd, BookingPATCH
 from schemas.events import EventRead
 from schemas.seats import EventSeatRead
 from services.base import BaseService
-from services.seats import SeatsService
 
 
 class EventsService(BaseService):

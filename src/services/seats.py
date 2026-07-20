@@ -1,6 +1,6 @@
 from typing import List
 
-from schemas.seats import SeatRead, EventSeatRead, EventSeatReadShort
+from schemas.seats import SeatRead, EventSeatReadShort
 from services.base import BaseService
 
 
@@ -15,4 +15,3 @@ class SeatsService(BaseService):
 
     async def get_all_events_seats(self) -> EventSeatReadShort:
         return await self.db.events_seats.get_all()
-

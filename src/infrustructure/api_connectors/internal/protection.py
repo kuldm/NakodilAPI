@@ -1,9 +1,6 @@
-from typing import List
 
 from infrustructure.api_connectors.base import BaseHTTPConnector
 from infrustructure.api_connectors.schemas import (
-    PaymentCalculateItemData,
-    PaymentCalculateData,
     ProtectionCalculateItemData,
     ProtectionCalculateData,
 )

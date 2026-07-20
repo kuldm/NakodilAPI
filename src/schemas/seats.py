@@ -38,4 +38,3 @@ class EventSeatReadShort(BaseModel):
     status: SeatStatus
     reserved_until: datetime | None
     booking_id: int | None
-

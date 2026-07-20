@@ -1,9 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Path
+from fastapi import APIRouter
 
 from api.dependencies import DBDep
-from schemas.seats import SeatRead, EventSeatRead, EventSeatReadShort
+from schemas.seats import SeatRead, EventSeatReadShort
 from services.seats import SeatsService
 
 router = APIRouter(prefix="/seats", tags=["Места"])
@@ -50,14 +50,3 @@ async def list_events_seats(
     return events_seats
 
 
-@router_events_seats.get(
-    "",
-    summary="Получение связи мероприятий и мест",
-    description="<h3>Получаем список всех связей мероприятий и мест<h3>",
-    response_model=List[EventSeatReadShort],
-)
-async def list_events_seats(
-    db: DBDep,
-):
-    events_seats = await SeatsService(db).get_all_events_seats()
-    return events_seats

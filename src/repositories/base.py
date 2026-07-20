@@ -1,5 +1,3 @@
-from unittest import result
-
 from pydantic import BaseModel
 from sqlalchemy import select, update, insert
 

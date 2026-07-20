@@ -14,4 +14,3 @@ class BookingsRepository(BaseRepository):
     ) -> CheckoutBooking:
         """Добавляет бронирование мест для пользователя."""
         seats = await SeatsRepository().get_all()
-

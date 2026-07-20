@@ -1,8 +1,8 @@
 from models.models import Event, Booking, Seat, EventSeat
 from repositories.mappers.base import DataMapper
+from schemas.bookings import BookingRead
 from schemas.events import EventRead
-from schemas.bookings import CheckoutBooking, BookingAdd, BookingRead
-from schemas.seats import SeatRead, EventSeatRead, EventSeatReadShort
+from schemas.seats import SeatRead, EventSeatReadShort
 
 
 class EventsDataMapper(DataMapper):

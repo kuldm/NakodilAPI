@@ -3,9 +3,7 @@ from typing import Annotated, List
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Depends, Header
 
-from api.dependencies import DBDep
 from exceptions import SeatsConflictException, SeatsConflictHTTPException
-from schemas.schemas import CheckoutResponse
 from schemas.events import EventRead
 from schemas.seats import EventSeatRead
 from schemas.bookings import BookingCreate
