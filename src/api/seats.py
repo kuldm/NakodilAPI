@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from api.dependencies import DBDep
 from schemas.seats import SeatRead, EventSeatReadShort
-from services.seats import SeatsService
+from services.seats import SeatsService, EventsSeatsService
 
 router = APIRouter(prefix="/seats", tags=["Места"])
 router_events_seats = APIRouter(prefix="/events-seats", tags=["Мероприятия и места"])
@@ -46,7 +46,19 @@ async def get_filtered_seats(
 async def list_events_seats(
     db: DBDep,
 ):
-    events_seats = await SeatsService(db).get_all_events_seats()
+    events_seats = await EventsSeatsService(db).get_all_events_seats()
     return events_seats
 
 
+@router_events_seats.get(
+    "/{event_id}",
+    summary="Получение связи мероприятий и мест пр ID мероприятия",
+    description="<h3>Получаем список всех связей мероприятий и мест по ID мероприятия<h3>",
+    response_model=List[EventSeatReadShort],
+)
+async def list_event_seats(
+    db: DBDep,
+    event_id: int,
+):
+    events_seats = await EventsSeatsService(db).get_event_seats_by_event_id(event_id)
+    return events_seats

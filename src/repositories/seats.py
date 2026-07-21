@@ -6,7 +6,7 @@ from sqlalchemy import update, select
 from models.models import Seat, EventSeat, SeatStatus
 from repositories.base import BaseRepository
 from repositories.mappers.mappers import SeatsDataMapper, EventsSeatsMapper
-from schemas.seats import EventSeatRead
+from schemas.seats import EventSeatRead, EventSeatReadShort
 
 
 class SeatsRepository(BaseRepository):
@@ -16,12 +16,15 @@ class SeatsRepository(BaseRepository):
     async def get_filtered_by_id(self, ids: List[int]):
         return await self.get_filtered(self.model.id.in_(ids))
 
-    # async def
 
-
-class EventsSeatsRepository(SeatsRepository):
+class EventsSeatsRepository(BaseRepository):
     model = EventSeat
     mapper = EventsSeatsMapper
+
+    async def get_event_seats_by_event_id(
+        self, event_id: int
+    ) -> List[EventSeatReadShort]:
+        return await self.get_filtered(self.model.event_id == event_id)
 
     async def lock_for_reserve(self, event_id: int, seat_ids: List[int]):
         query = (
@@ -46,7 +49,9 @@ class EventsSeatsRepository(SeatsRepository):
         )
         await self.session.execute(query)
 
-    async def get_by_event_id(self, event_id: int) -> List[EventSeatRead]:
+    async def get_relation_seat_and_event_seats_by_event_id(
+        self, event_id: int
+    ) -> List[EventSeatRead]:
         query = (
             select(
                 EventSeat.id,

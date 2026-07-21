@@ -11,8 +11,9 @@ from infrustructure.api_connectors.schemas import (
     ProtectionCalculateItemData,
 )
 from models.models import EventSeat, SeatStatus
-from schemas.bookings import BookingCreate, BookingAdd, BookingPATCH
+from schemas.bookings import BookingCreate, BookingAdd, BookingPATCH, CheckoutBooking
 from schemas.events import EventRead
+from schemas.schemas import CheckoutResponse
 from schemas.seats import EventSeatRead
 from services.base import BaseService
 
@@ -25,14 +26,13 @@ class EventsService(BaseService):
         return await self.db.events.get_one_or_none(id=event_id)
 
     async def get_event_seats(self, event_id: int) -> list[EventSeatRead]:
-        return await self.db.events_seats.get_by_event_id(event_id=event_id)
+        return await self.db.events_seats.get_relation_seat_and_event_seats_by_event_id(
+            event_id=event_id
+        )
 
     async def prepare_checkout(
         self, user_id: int, event_id: int, payload: BookingCreate
-    ):
-        # TODO: создать бронь для выбранных мест через SELECT FOR UPDATE, и посчитать базовую стоимость.
-        # TODO: конкурентно запросить Payment API и Protection API для расчета checkout.
-        ...
+    ) -> CheckoutResponse:
         # 1) Блокируем выбранные места
         seats = await self.db.events_seats.lock_for_reserve(
             event_id=event_id, seat_ids=payload.seat_ids
@@ -90,6 +90,7 @@ class EventsService(BaseService):
         )
         # ожидаем результат оплаты
         payment = await payment_task
+        print(f"{payment=}")
 
         # Пробуем дождать результата страховки, если не выполнится быстрее 3 секунд то выбрасываем ошибку
         try:
@@ -108,9 +109,33 @@ class EventsService(BaseService):
             exclude_unset=True,
             id=booking.id,
         )
-
         await self.db.commit()
-        return booking
+
+        booking = await self.db.bookings.get_one_or_none(id=booking.id)
+        booking = CheckoutBooking(
+            id=booking.id,
+            event_title=event.title,
+            starts_at=event.starts_at,
+            seats=[
+                {
+                    "id": seat.id,
+                    "seat_id": seat.seat_id,
+                    "price": seat.price,
+                }
+                for seat in seats
+            ],
+            base_amount=booking.amount,
+            payment_commission=booking.payment_commission,
+            protection_price=booking.protection_price,
+            with_protection=booking.with_protection,
+            reserved_until=booking.reserved_until,
+        )
+        checkout_booking = CheckoutResponse(
+            booking=booking,
+            payment=payment,
+            protection=protection,
+        )
+        return checkout_booking
 
     @classmethod
     def _is_free(cls, event_seat: EventSeat, now: datetime) -> bool:

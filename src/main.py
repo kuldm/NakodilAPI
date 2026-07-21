@@ -20,6 +20,7 @@ from api.events import router as router_events
 from api.system import router_ping
 from api.seats import router as router_seats
 from api.seats import router_events_seats
+from api.organizers import router as router_organizer
 from config import settings
 from di import AppProvider
 
@@ -54,6 +55,7 @@ app.include_router(router)
 app.include_router(router_events)
 app.include_router(router_seats)
 app.include_router(router_events_seats)
+app.include_router(router_organizer)
 
 setup_dishka(container=container, app=app)
 

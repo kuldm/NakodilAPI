@@ -20,6 +20,22 @@ class SeatsConflictException(NakodilException):
     detail = "Места уже забронированы"
 
 
+class EventDoesNotBelongToOrganizerException(NakodilException):
+    detail = "Мероприятие не принадлежит организатору"
+
+
+class EventSeatsIsEmptyException(NakodilException):
+    detail = "Список связанных мест и мероприятий пуст"
+
+
+class BookingsIsEmptyException(NakodilException):
+    detail = "Список заказов пуст"
+
+
+class EventNotFoundException(NakodilException):
+    detail = "Мероприятие не найдено"
+
+
 class NakodilHTTPException(HTTPException):
     status_code = 500
     detail = None
@@ -41,3 +57,13 @@ class UserNotFoundHTTPException(NakodilHTTPException):
 class SeatsConflictHTTPException(NakodilHTTPException):
     status_code = 409
     detail = "Места уже забронированы"
+
+
+class EventDoesNotBelongToOrganizerHTTPException(NakodilHTTPException):
+    status_code = 400
+    detail = "Мероприятие не принадлежит организатору"
+
+
+class EventNotFoundHTTPException(NakodilHTTPException):
+    status_code = 400
+    detail = "Мероприятие не найдено"

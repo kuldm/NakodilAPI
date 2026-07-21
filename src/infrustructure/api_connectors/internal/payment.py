@@ -1,8 +1,7 @@
-
 from infrustructure.api_connectors.base import BaseHTTPConnector
 from infrustructure.api_connectors.schemas import (
     PaymentCalculateItemData,
-    PaymentCalculateData,
+    PaymentQuote,
 )
 
 
@@ -24,7 +23,7 @@ class PaymentConnector(BaseHTTPConnector):
     async def payment_calculate(
         self,
         data: PaymentCalculateItemData,
-    ) -> PaymentCalculateData:
+    ) -> PaymentQuote:
         response = await self._request(
             "POST",
             "/payment/calculate",
@@ -33,4 +32,4 @@ class PaymentConnector(BaseHTTPConnector):
             retry_count=2,
         )
         response.raise_for_status()
-        return PaymentCalculateData.model_validate(response.json())
+        return PaymentQuote.model_validate(response.json())

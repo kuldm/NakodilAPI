@@ -4,9 +4,10 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Depends, Header
 
 from exceptions import SeatsConflictException, SeatsConflictHTTPException
-from schemas.events import EventRead
-from schemas.seats import EventSeatRead
 from schemas.bookings import BookingCreate
+from schemas.events import EventRead
+from schemas.schemas import CheckoutResponse
+from schemas.seats import EventSeatRead
 from services.events import EventsService
 
 router = APIRouter(prefix="/events", route_class=DishkaRoute, tags=["Мероприятия"])
@@ -64,7 +65,7 @@ async def list_event_seats(
     "/{event_id}/checkout",
     summary="Временно бронирует места",
     description="<h3>Этот метод временно бронирует места за клиентом, возвращает итоговую стоимость и возможность страховки<h3>",
-    # response_model=CheckoutResponse,
+    response_model=CheckoutResponse,
 )
 async def prepare_checkout(
     service: FromDishka[EventsService],

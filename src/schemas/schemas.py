@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from infrustructure.api_connectors.schemas import PaymentQuote, ProtectionQuote
 from models.models import BookingStatus
 from schemas.bookings import CheckoutBooking
 from schemas.seats import SeatRead
@@ -41,19 +42,6 @@ class EventDashboard(BaseModel):
     sales: SalesDashboard
     occupancy: OccupancyDashboard
 
-
-class PaymentQuote(BaseModel):
-    commission: int
-    total: int
-    payment_methods: list[str]
-    expires_at: datetime | None = None
-
-
-class ProtectionQuote(BaseModel):
-    available: bool
-    price: int
-    covered_amount: int
-    description: str | None = None
 
 
 class CheckoutResponse(BaseModel):

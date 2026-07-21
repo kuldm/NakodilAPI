@@ -1,8 +1,7 @@
-
 from infrustructure.api_connectors.base import BaseHTTPConnector
 from infrustructure.api_connectors.schemas import (
     ProtectionCalculateItemData,
-    ProtectionCalculateData,
+    ProtectionQuote,
 )
 
 
@@ -24,9 +23,9 @@ class ProtectionConnector(BaseHTTPConnector):
     async def protection_calculate(
         self,
         data: ProtectionCalculateItemData,
-    ) -> ProtectionCalculateData:
+    ) -> ProtectionQuote:
         response = await self._request(
             "POST", "/protection/calculate", json=data.model_dump(), retry=False
         )
         response.raise_for_status()
-        return ProtectionCalculateData.model_validate(response.json())
+        return ProtectionQuote.model_validate(response.json())

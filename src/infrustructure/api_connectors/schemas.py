@@ -11,11 +11,11 @@ class PaymentCalculateItemData(BaseModel):
     model_config = ConfigDict(frozen=True)
 
 
-class PaymentCalculateData(BaseModel):
+class PaymentQuote(BaseModel):
     commission: int
     total: int
     payment_methods: list[str]
-    expires_at: datetime | None
+    expires_at: datetime | None = None
 
     model_config = ConfigDict(frozen=True)
 
@@ -29,10 +29,10 @@ class ProtectionCalculateItemData(BaseModel):
     model_config = ConfigDict(frozen=True)
 
 
-class ProtectionCalculateData(BaseModel):
+class ProtectionQuote(BaseModel):
     available: bool
     price: int
     covered_amount: int
-    description: str | None
+    description: str | None = None
 
     model_config = ConfigDict(frozen=True)

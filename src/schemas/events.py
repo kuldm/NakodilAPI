@@ -13,7 +13,6 @@ class EventCreate(BaseModel):
 
 
 class EventRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
     id: int
     organizer_id: int
     location_id: int
@@ -22,3 +21,11 @@ class EventRead(BaseModel):
     category: str
     starts_at: datetime
     base_price: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EventAdd(EventCreate):
+    organizer_id: int
+
+    model_config = ConfigDict(from_attributes=True)

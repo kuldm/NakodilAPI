@@ -23,7 +23,9 @@ class Settings(BaseSettings):
     PAYMENT_TIMEOUT: float
     PROTECTION_TIMEOUT: float
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
 
 settings = Settings()  # type: ignore[call-arg]

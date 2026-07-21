@@ -7,6 +7,7 @@ from db import async_session_maker
 from infrustructure.api_connectors.internal.payment import PaymentConnector
 from infrustructure.api_connectors.internal.protection import ProtectionConnector
 from services.events import EventsService
+from services.organizers import OrganizersService
 from utils.db_manager import DBManager
 
 
@@ -39,4 +40,13 @@ class AppProvider(Provider):
             db=db,
             payment_connector=payment_connector,
             protection_connector=protection_connector,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    def organizers_service(
+        self,
+        db: DBManager,
+    ) -> OrganizersService:
+        return OrganizersService(
+            db=db,
         )
