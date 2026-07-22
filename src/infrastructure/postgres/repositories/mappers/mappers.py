@@ -1,5 +1,5 @@
-from models.models import Event, Booking, Seat, EventSeat
-from repositories.mappers.base import DataMapper
+from infrastructure.postgres.models.models import Event, Booking, Seat, EventSeat
+from infrastructure.postgres.repositories.mappers.base import DataMapper
 from schemas.bookings import BookingRead
 from schemas.events import EventRead
 from schemas.seats import SeatRead, EventSeatReadShort

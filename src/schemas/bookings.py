@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from models.models import BookingStatus
+from infrastructure.postgres.models.models import BookingStatus
 
 
 class BookingCreate(BaseModel):

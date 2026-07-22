@@ -3,7 +3,7 @@ from typing import List
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter
 
-from api.events import CurrentUserId
+from api.routes.events import CurrentUserId
 from exceptions import (
     EventDoesNotBelongToOrganizerHTTPException,
     EventDoesNotBelongToOrganizerException,

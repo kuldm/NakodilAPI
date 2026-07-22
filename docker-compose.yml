@@ -11,17 +11,17 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   payment-api:
-    build: ./mock_apis/payment
+    build: src/mock_apis/payment
     ports:
       - "9001:9001"
 
   protection-api:
-    build: ./mock_apis/protection
+    build: src/mock_apis/protection
     ports:
       - "9002:9002"
 
   app:
-    build: .
+    build: src
     ports:
       - "8000:8000"
     volumes:

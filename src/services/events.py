@@ -1,16 +1,14 @@
 import asyncio
-import random
 from datetime import datetime, timedelta, timezone
 
-import httpx
-
+# from config import settings
 from config import settings
 from exceptions import SeatsConflictException
-from infrustructure.api_connectors.schemas import (
+from infrastructure.api_connectors.schemas import (
     PaymentCalculateItemData,
     ProtectionCalculateItemData,
 )
-from models.models import EventSeat, SeatStatus
+from infrastructure.postgres.models.models import EventSeat, SeatStatus
 from schemas.bookings import BookingCreate, BookingAdd, BookingPATCH, CheckoutBooking
 from schemas.events import EventRead
 from schemas.schemas import CheckoutResponse
@@ -43,7 +41,7 @@ class EventsService(BaseService):
         if any(not self._is_free(seat, now) for seat in seats):
             raise SeatsConflictException
 
-        reserved_until = now + timedelta(minutes=settings.RESERVATION_MINUTES)
+        reserved_until = now + timedelta(minutes=settings.booking.reservation_minutes)
         amount = sum(seat.price for seat in seats)
 
         # 3 Создаём бронь
@@ -90,7 +88,6 @@ class EventsService(BaseService):
         )
         # ожидаем результат оплаты
         payment = await payment_task
-        print(f"{payment=}")
 
         # Пробуем дождать результата страховки, если не выполнится быстрее 3 секунд то выбрасываем ошибку
         try:
@@ -149,45 +146,42 @@ class EventsService(BaseService):
             return True
         return False
 
-    # НЕ используется но в перспеткиве дописать чтобы всё равно данные по страховке добавлялись в базу
-    async def _persist_protection_later(
-        self,
-        booking_id: int,
-        payload: ProtectionCalculateItemData,
-        first_task: asyncio.Task | None = None,
-    ) -> None:
-        protection = None
-
-        # 1) дождаться первого конкурентного запроса
-        if first_task is not None:
-            try:
-                protection = await first_task
-            except Exception:
-                protection = None
-
-        # 2) пока не получили валидный ответ — ретраим
-        attempt = 0
-        while protection is None:
-            attempt += 1
-            try:
-                protection = await self.protection_connector.protection_calculate(
-                    payload
-                )
-            except httpx.HTTPError:
-                delay = 2 ** (attempt - 1)
-                jitter = random.uniform(0.1, 0.5)
-                await asyncio.sleep(delay + jitter)
-
-        from db import async_session_maker
-        from utils.db_manager import DBManager
-
-        async with DBManager(session_factory=async_session_maker) as db:
-            await db.bookings.edit(
-                BookingPATCH(
-                    protection_price=protection.price,
-                    with_protection=protection.available,
-                ),
-                exclude_unset=True,
-                id=booking_id,
-            )
-            await db.commit()
+    # # НЕ используется но в перспеткиве дописать чтобы всё равно данные по страховке добавлялись в базу
+    # async def _persist_protection_later(
+    #     self,
+    #     booking_id: int,
+    #     payload: ProtectionCalculateItemData,
+    #     first_task: asyncio.Task | None = None,
+    # ) -> None:
+    #     protection = None
+    #
+    #     # 1) дождаться первого конкурентного запроса
+    #     if first_task is not None:
+    #         try:
+    #             protection = await first_task
+    #         except Exception:
+    #             protection = None
+    #
+    #     # 2) пока не получили валидный ответ — ретраим
+    #     attempt = 0
+    #     while protection is None:
+    #         attempt += 1
+    #         try:
+    #             protection = await self.protection_connector.protection_calculate(
+    #                 payload
+    #             )
+    #         except httpx.HTTPError:
+    #             delay = 2 ** (attempt - 1)
+    #             jitter = random.uniform(0.1, 0.5)
+    #             await asyncio.sleep(delay + jitter)
+    #
+    #     async with self.postgres.session() as db:
+    #         await db.bookings.edit(
+    #             BookingPATCH(
+    #                 protection_price=protection.price,
+    #                 with_protection=protection.available,
+    #             ),
+    #             exclude_unset=True,
+    #             id=booking_id,
+    #         )
+    #         await db.commit()

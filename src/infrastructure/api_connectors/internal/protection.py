@@ -1,5 +1,5 @@
-from infrustructure.api_connectors.base import BaseHTTPConnector
-from infrustructure.api_connectors.schemas import (
+from infrastructure.api_connectors.base import BaseHTTPConnector
+from infrastructure.api_connectors.schemas import (
     ProtectionCalculateItemData,
     ProtectionQuote,
 )

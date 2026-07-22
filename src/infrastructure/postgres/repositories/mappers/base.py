@@ -2,7 +2,8 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 
-from src.db import Base
+# from db import Base
+from infrastructure.postgres.models.models import Base
 
 DBModelType = TypeVar("DBModelType", bound=Base)
 SchemaType = TypeVar("SchemaType", bound=BaseModel)

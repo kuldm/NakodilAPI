@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from db import async_session_maker
-from utils.db_manager import DBManager
+from infrastructure.postgres.db import async_session_maker
+from infrastructure.postgres.db_manager import DBManager
 
 
 async def get_db():

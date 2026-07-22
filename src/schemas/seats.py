@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from models.models import SeatStatus
+from infrastructure.postgres.models.models import SeatStatus
 
 
 class SeatRead(BaseModel):

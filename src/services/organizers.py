@@ -4,7 +4,7 @@ from exceptions import (
     EventDoesNotBelongToOrganizerException,
     EventNotFoundException,
 )
-from models.models import Event, SeatStatus, Booking, BookingStatus
+from infrastructure.postgres.models.models import Event, SeatStatus, Booking, BookingStatus
 from schemas.events import EventRead, EventCreate, EventAdd
 from schemas.schemas import EventDashboard, OccupancyDashboard, SalesDashboard
 from services.base import BaseService

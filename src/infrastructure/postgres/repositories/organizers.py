@@ -1,4 +1,4 @@
-from repositories.base import BaseRepository
+from infrastructure.postgres.repositories.base import BaseRepository
 
 
 class OrganizersRepository(BaseRepository):

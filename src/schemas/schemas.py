@@ -2,8 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from infrustructure.api_connectors.schemas import PaymentQuote, ProtectionQuote
-from models.models import BookingStatus
+from infrastructure.api_connectors.schemas import PaymentQuote, ProtectionQuote
+from infrastructure.postgres.models.models import BookingStatus
 from schemas.bookings import CheckoutBooking
 from schemas.seats import SeatRead
 
