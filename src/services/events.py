@@ -66,6 +66,10 @@ class EventsService(BaseService):
 
         event = await self.get_event_by_id(event_id)
 
+        # ВАЖНЫЙ МОМЕНТ освобождать соединение с базой данных, чтобы если другие клиенты запрашивают те же места, им сразу приходила ошибка что места заняты и они не ждали ответа ошибки долго
+        await self.db.commit()
+
+
         # 5 Обращаемся к апи оплаты
         payment_task = asyncio.create_task(
             self.payment_connector.payment_calculate(
