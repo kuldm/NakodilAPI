@@ -28,8 +28,7 @@ CurrentUserId = Annotated[int, Depends(get_current_user_id)]
 async def list_events(
     service: FromDishka[EventsService],
 ):
-    events = await service.get_all_events()
-    return events
+    return await service.get_all_events()
 
 
 @router.get(
@@ -42,8 +41,7 @@ async def get_event(
     event_id: int,
     service: FromDishka[EventsService],
 ):
-    event = await service.get_event_by_id(event_id)
-    return event
+    return await service.get_event_by_id(event_id)
 
 
 @router.get(
@@ -56,8 +54,7 @@ async def list_event_seats(
     event_id: int,
     service: FromDishka[EventsService],
 ):
-    events = await service.get_event_seats(event_id)
-    return events
+    return await service.get_event_seats(event_id)
 
 
 @router.post(

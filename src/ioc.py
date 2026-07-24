@@ -19,6 +19,8 @@ from infrastructure.api_connectors.internal.protection import ProtectionConnecto
 from services.events import EventsService
 from services.organizers import OrganizersService
 from infrastructure.postgres.db_manager import PostgresClient, DatabaseManager
+from services.reports import JobService
+from services.seats import SeatsService, EventsSeatsService
 
 
 class ConfigProvider(Provider):
@@ -106,6 +108,8 @@ class AppProvider(Provider):
 
         await connector._close_client()
 
+
+class ServiceProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def events_service(
         self,
@@ -128,11 +132,36 @@ class AppProvider(Provider):
             db=db,
         )
 
+    @provide(scope=Scope.REQUEST)
+    def seats_service(
+        self,
+        db: DatabaseManager,
+    ) -> SeatsService:
+        return SeatsService(
+            db=db,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    def event_seats_service(
+        self,
+        db: DatabaseManager,
+    ) -> EventsSeatsService:
+        return EventsSeatsService(
+            db=db,
+        )
+
+    @provide(scope=Scope.REQUEST)
+    def job_service(
+        self,
+    ) -> JobService:
+        return JobService()
+
 
 def create_container(settings: Settings):
     return make_async_container(
         ConfigProvider(settings),
         PostgresProvider(),
         AppProvider(),
+        ServiceProvider(),
         FastapiProvider(),
     )

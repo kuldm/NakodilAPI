@@ -24,8 +24,7 @@ async def list_organizer_events(
     organizer_id: CurrentUserId,
     service: FromDishka[OrganizersService],
 ):
-    events = await service.get_organizer_events(organizer_id)
-    return events
+    return await service.get_organizer_events(organizer_id)
 
 
 @router.post(
@@ -39,8 +38,7 @@ async def create_event(
     organizer_id: CurrentUserId,
     service: FromDishka[OrganizersService],
 ):
-    event = await service.create_organizer_event(organizer_id, payload)
-    return event
+    return await service.create_organizer_event(organizer_id, payload)
 
 
 @router.get(

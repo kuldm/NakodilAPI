@@ -7,7 +7,6 @@ from fastapi import APIRouter
 # from api.dependencies import DBDep
 from schemas.seats import SeatRead, EventSeatReadShort
 from services.seats import SeatsService, EventsSeatsService
-from infrastructure.postgres.db_manager import DatabaseManager
 
 router = APIRouter(prefix="/seats", route_class=DishkaRoute, tags=["Места"])
 router_events_seats = APIRouter(
@@ -22,10 +21,9 @@ router_events_seats = APIRouter(
     response_model=List[SeatRead],
 )
 async def list_seats(
-    db: FromDishka[DatabaseManager],
+    service: FromDishka[SeatsService],
 ):
-    seats = await SeatsService(db).get_all_seats()
-    return seats
+    return await service.get_all_seats()
 
 
 @router.post(
@@ -35,11 +33,10 @@ async def list_seats(
     response_model=List[SeatRead],
 )
 async def get_filtered_seats(
-    db: FromDishka[DatabaseManager],
+    service: FromDishka[SeatsService],
     seat_ids: List[int],
 ):
-    seats = await SeatsService(db).get_filtered_seats(seat_ids)
-    return seats
+    return await service.get_filtered_seats(seat_ids)
 
 
 @router_events_seats.get(
@@ -49,10 +46,10 @@ async def get_filtered_seats(
     response_model=List[EventSeatReadShort],
 )
 async def list_events_seats(
-    db: FromDishka[DatabaseManager],
+    service: FromDishka[EventsSeatsService],
 ):
-    events_seats = await EventsSeatsService(db).get_all_events_seats()
-    return events_seats
+    return await service.get_all_events_seats()
+
 
 
 @router_events_seats.get(
@@ -62,8 +59,7 @@ async def list_events_seats(
     response_model=List[EventSeatReadShort],
 )
 async def list_event_seats(
-    db: FromDishka[DatabaseManager],
+    service: FromDishka[EventsSeatsService],
     event_id: int,
 ):
-    events_seats = await EventsSeatsService(db).get_event_seats_by_event_id(event_id)
-    return events_seats
+    return await service.get_event_seats_by_event_id(event_id)
