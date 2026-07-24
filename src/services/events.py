@@ -69,36 +69,21 @@ class EventsService(BaseService):
         # ВАЖНЫЙ МОМЕНТ освобождать соединение с базой данных, чтобы если другие клиенты запрашивают те же места, им сразу приходила ошибка что места заняты и они не ждали ответа ошибки долго
         await self.db.commit()
 
-
-        # 5 Обращаемся к апи оплаты
-        payment_task = asyncio.create_task(
-            self.payment_connector.payment_calculate(
-                PaymentCalculateItemData(
-                    booking_id=booking.id, amount=booking.amount, currency="RUB"
-                ),
-            )
+        # 5 Создаём данные чтобы удобно их передать в gather
+        payment_payload = PaymentCalculateItemData(
+            booking_id=booking.id, amount=booking.amount, currency="RUB"
         )
-
         protection_payload = ProtectionCalculateItemData(
             booking_id=booking.id,
             ticket_amount=booking.amount,
             event_category=event.category,
             event_starts_at=str(event.starts_at),
         )
-
-        # 6 Обращаемся к апи страховки
-        protection_task = asyncio.create_task(
-            self.protection_connector.protection_calculate(protection_payload)
+        # 6 обращаемся паралельно к апи оплаты и старховки
+        payment, protection = await asyncio.gather(
+            self.payment_connector.payment_calculate(payment_payload),
+            self._protection_or_none(protection_payload),
         )
-        # ожидаем результат оплаты
-        payment = await payment_task
-
-        # Пробуем дождать результата страховки, если не выполнится быстрее 3 секунд то выбрасываем ошибку
-        try:
-            protection = await asyncio.wait_for(protection_task, timeout=3)
-        except TimeoutError as ex:
-            print(f"Protection calculation error: {type(ex).__name__}: {ex}")
-            protection = None
 
         # Добавляем в таблицу заказов полученные данные от сервиса оплаты и страховки
         booking = await self.db.bookings.edit(
@@ -137,6 +122,16 @@ class EventsService(BaseService):
             protection=protection,
         )
         return checkout_booking
+
+    async def _protection_or_none(self, protection_payload):
+        try:
+            return await asyncio.wait_for(
+                self.protection_connector.protection_calculate(protection_payload),
+                timeout=3,
+            )
+        except TimeoutError as ex:
+            print(f"Protection calculation error: {type(ex).__name__}: {ex}")
+            return None
 
     @classmethod
     def _is_free(cls, event_seat: EventSeat, now: datetime) -> bool:
