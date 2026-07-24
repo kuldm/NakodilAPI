@@ -2,28 +2,22 @@ import sys
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-
-from api.reports import router as reports_router
-from api.system import router_ping
+import utils.fastapi_warnings  # noqa
+from api.app import create_fastapi_app
+from ioc import create_container
 from config import settings
 
-app = FastAPI(
-    title=settings.APP_NAME,
-    description=f"Разработчик: {settings.DEVELOPER}",
-    swagger_ui_parameters={"displayRequestDuration": True},
-)
 
-app.include_router(reports_router)
-app.include_router(router_ping)
+container = create_container(settings)
+app = create_fastapi_app(settings, container)
 
 
 @app.get("/")
 async def root():
-    return {"name": settings.APP_NAME, "developer": settings.DEVELOPER}
+    return {"name": settings.app.app_name, "developer": settings.app.developer}
 
 
 if __name__ == "__main__":
