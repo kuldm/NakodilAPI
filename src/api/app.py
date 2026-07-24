@@ -4,10 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from dishka.integrations.fastapi import setup_dishka
 
 from api.lifespan import create_lifespan
-# from samokat.api.exceptions import setup_exception_handlers
-# from samokat.api.lifespan import create_lifespan
 from src.api import main_router
-from src.config import Settings, AppConfig
+from src.config import Settings
+from src.api.exception_handler import setup_exception_handler
 
 
 def create_fastapi_app(
@@ -21,6 +20,7 @@ def create_fastapi_app(
         lifespan=create_lifespan(container),
         # debug=False,
     )
+    setup_exception_handler(app)
 
     app.add_middleware(
         CORSMiddleware,

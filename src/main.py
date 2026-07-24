@@ -5,7 +5,7 @@ import uvicorn
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-import utils.fastapi_warnings
+import utils.fastapi_warnings  # noqa
 from api.app import create_fastapi_app
 from ioc import create_container
 from config import settings

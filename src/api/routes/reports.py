@@ -1,11 +1,5 @@
 from fastapi import APIRouter, Path
 
-from exceptions import (
-    JobNotFoundException,
-    JobNotFoundHTTPException,
-    UserNotFoundException,
-    UserNotFoundHTTPException,
-)
 from schemas.reports import JobStatusResponse, JobResult
 from services.reports import JobService
 
@@ -21,10 +15,7 @@ router = APIRouter(prefix="/reports", tags=["Отчёты"])
 async def get_user_report(
     user_id: int = Path(example=1, description="ID задачи", ge=1, le=208),  # noqa
 ):
-    try:
-        return await JobService().create_job(user_id)
-    except UserNotFoundException:
-        raise UserNotFoundHTTPException
+    return await JobService().create_job(user_id)
 
 
 @router.get(
@@ -34,7 +25,4 @@ async def get_user_report(
     response_model=JobResult,
 )
 async def get_status_job(job_id: int = Path(example=1, description="ID задачи", ge=1)):  # noqa
-    try:
-        return await JobService().get_job(job_id)
-    except JobNotFoundException:
-        raise JobNotFoundHTTPException
+    return await JobService().get_job(job_id)

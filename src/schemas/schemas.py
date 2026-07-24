@@ -43,7 +43,6 @@ class EventDashboard(BaseModel):
     occupancy: OccupancyDashboard
 
 
-
 class CheckoutResponse(BaseModel):
     booking: CheckoutBooking
     payment: PaymentQuote

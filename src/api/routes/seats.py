@@ -10,7 +10,9 @@ from services.seats import SeatsService, EventsSeatsService
 from infrastructure.postgres.db_manager import DatabaseManager
 
 router = APIRouter(prefix="/seats", route_class=DishkaRoute, tags=["Места"])
-router_events_seats = APIRouter(prefix="/events-seats", route_class=DishkaRoute, tags=["Мероприятия и места"])
+router_events_seats = APIRouter(
+    prefix="/events-seats", route_class=DishkaRoute, tags=["Мероприятия и места"]
+)
 
 
 @router.get(

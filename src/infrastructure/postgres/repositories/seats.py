@@ -5,7 +5,10 @@ from sqlalchemy import update, select
 
 from infrastructure.postgres.models.models import Seat, EventSeat, SeatStatus
 from infrastructure.postgres.repositories.base import BaseRepository
-from infrastructure.postgres.repositories.mappers.mappers import SeatsDataMapper, EventsSeatsMapper
+from infrastructure.postgres.repositories.mappers.mappers import (
+    SeatsDataMapper,
+    EventsSeatsMapper,
+)
 from schemas.seats import EventSeatRead, EventSeatReadShort
 
 

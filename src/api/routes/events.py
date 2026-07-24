@@ -3,7 +3,6 @@ from typing import Annotated, List
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Depends, Header
 
-from exceptions import SeatsConflictException, SeatsConflictHTTPException
 from schemas.bookings import BookingCreate
 from schemas.events import EventRead
 from schemas.schemas import CheckoutResponse
@@ -73,7 +72,4 @@ async def prepare_checkout(
     event_id: int,
     payload: BookingCreate,
 ):
-    try:
-        return await service.prepare_checkout(user_id, event_id, payload)
-    except SeatsConflictException:
-        raise SeatsConflictHTTPException
+    return await service.prepare_checkout(user_id, event_id, payload)

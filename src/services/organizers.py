@@ -4,7 +4,12 @@ from exceptions import (
     EventDoesNotBelongToOrganizerException,
     EventNotFoundException,
 )
-from infrastructure.postgres.models.models import Event, SeatStatus, Booking, BookingStatus
+from infrastructure.postgres.models.models import (
+    Event,
+    SeatStatus,
+    Booking,
+    BookingStatus,
+)
 from schemas.events import EventRead, EventCreate, EventAdd
 from schemas.schemas import EventDashboard, OccupancyDashboard, SalesDashboard
 from services.base import BaseService
@@ -55,7 +60,9 @@ class OrganizersService(BaseService):
             event_seats = await db.events_seats.get_event_seats_by_event_id(event_id)
 
             if not event_seats:
-                return OccupancyDashboard(total=0, available=0, reserved=0, sold=0, occupancy_percent=0.0)
+                return OccupancyDashboard(
+                    total=0, available=0, reserved=0, sold=0, occupancy_percent=0.0
+                )
 
         total = len(event_seats)
         available = sum(
@@ -79,7 +86,9 @@ class OrganizersService(BaseService):
             bookings = await db.bookings.get_filtered(Booking.event_id == event_id)
 
             if not bookings:
-                return SalesDashboard(paid_orders=0, sold_tickets=0, revenue=0, average_order=0)
+                return SalesDashboard(
+                    paid_orders=0, sold_tickets=0, revenue=0, average_order=0
+                )
 
         paid_orders = sum(
             1 for booking in bookings if booking.status == BookingStatus.paid

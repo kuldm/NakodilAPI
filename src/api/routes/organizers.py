@@ -4,12 +4,6 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter
 
 from api.routes.events import CurrentUserId
-from exceptions import (
-    EventDoesNotBelongToOrganizerHTTPException,
-    EventDoesNotBelongToOrganizerException,
-    EventNotFoundHTTPException,
-    EventNotFoundException,
-)
 from schemas.events import (
     EventCreate,
     EventRead,
@@ -60,10 +54,4 @@ async def get_event_dashboard(
     organizer_id: CurrentUserId,
     service: FromDishka[OrganizersService],
 ):
-    try:
-        event_dashboard = await service.get_event_dashboard(event_id, organizer_id)
-    except EventDoesNotBelongToOrganizerException:
-        raise EventDoesNotBelongToOrganizerHTTPException
-    except EventNotFoundException:
-        raise EventNotFoundHTTPException
-    return event_dashboard
+    return await service.get_event_dashboard(event_id, organizer_id)

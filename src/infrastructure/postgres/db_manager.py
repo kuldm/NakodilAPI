@@ -12,7 +12,10 @@ from config import PostgresConfig
 from infrastructure.postgres.repositories.bookings import BookingsRepository
 from infrastructure.postgres.repositories.events import EventsRepository
 from infrastructure.postgres.repositories.organizers import OrganizersRepository
-from infrastructure.postgres.repositories.seats import SeatsRepository, EventsSeatsRepository
+from infrastructure.postgres.repositories.seats import (
+    SeatsRepository,
+    EventsSeatsRepository,
+)
 
 
 class DBManager:
