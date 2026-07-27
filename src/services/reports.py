@@ -90,7 +90,7 @@ class JobService(BaseService):
 
 class UserService(BaseService):
     async def get_user_data(self, user_id: int) -> dict:
-        response = await httpx.AsyncClient().get(f"{settings.API_URL}/{user_id}")
+        response = await httpx.AsyncClient().get(f"{settings.report.api_url}/{user_id}")
         if response.status_code == 404:
             raise UserNotFoundException
         return response.json()
