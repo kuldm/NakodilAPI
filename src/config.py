@@ -4,6 +4,10 @@ from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class RedisConfig(BaseModel):
+    redis_url: str
+
+
 class ReportConfig(BaseModel):
     api_url: str
 
@@ -59,6 +63,7 @@ class Settings(BaseSettings):
     booking: BookingConfig
     report: ReportConfig
     connectors: ConnectorsConfig
+    redis: RedisConfig
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -110,3 +110,12 @@ class EventSeat(Base):
         ForeignKey("bookings.id"),
         index=True,
     )
+
+
+class EventView(Base):
+    """Количество просмотров мероприятия."""
+
+    __tablename__ = "event_views"
+
+    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), primary_key=True)
+    views_count: Mapped[int] = mapped_column(default=0, server_default="0")

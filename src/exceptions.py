@@ -37,5 +37,10 @@ class BookingsIsEmptyException(NakodilException):
 
 
 class EventNotFoundException(NakodilException):
-    status_code = 400
+    status_code = 404
     detail = "Мероприятие не найдено"
+
+
+class EventLoadingTimeoutException(NakodilException):
+    status_code = 409
+    detail = "Таймаут загрузки Мероприятия"

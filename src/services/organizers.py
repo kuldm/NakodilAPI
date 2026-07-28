@@ -21,11 +21,12 @@ class OrganizersService(BaseService):
 
     async def create_organizer_event(
         self, organizer_id: int, payload: EventCreate
-    ) -> None:
+    ) -> EventRead:
         event = await self.db.events.add(
             EventAdd(**payload.model_dump(), organizer_id=organizer_id)
         )
         await self.db.commit()
+        await self.event_cache.set_event(event)
         return event
 
     async def get_event_dashboard(

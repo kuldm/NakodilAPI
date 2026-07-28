@@ -1,14 +1,21 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 
+from redis.exceptions import LockError
+
 # from config import settings
 from config import settings
-from exceptions import SeatsConflictException
+from exceptions import (
+    SeatsConflictException,
+    EventNotFoundException,
+    EventLoadingTimeoutException,
+)
 from infrastructure.api_connectors.schemas import (
     PaymentCalculateItemData,
     ProtectionCalculateItemData,
 )
 from infrastructure.postgres.models.models import EventSeat, SeatStatus
+from infrastructure.redis.event_cache import EventCache
 from schemas.bookings import BookingCreate, BookingAdd, BookingPATCH, CheckoutBooking
 from schemas.events import EventRead
 from schemas.schemas import CheckoutResponse
@@ -21,7 +28,37 @@ class EventsService(BaseService):
         return await self.db.events.get_all()
 
     async def get_event_by_id(self, event_id: int) -> EventRead:
-        return await self.db.events.get_one_or_none(id=event_id)
+        event_cached = await self.event_cache.get_event(event_id)
+        if event_cached is not None:
+            return event_cached
+
+        try:
+            async with self.redis_client.client.lock(
+                name=f"lock:event:{event_id}",
+                timeout=5,
+                blocking_timeout=3,
+            ):
+                event = await self.event_cache.get_event(event_id)
+                if event is not None:
+                    return event
+
+                event = await self._load_event(event_id)
+                return event
+
+        except LockError:
+            event = await self.event_cache.get_event(event_id)
+            if event is not None:
+                return event
+
+            raise EventLoadingTimeoutException
+
+    async def _load_event(self, event_id: int) -> EventRead:
+        event = await self.db.events.get_one_or_none(id=event_id)
+        if event is None:
+            raise EventNotFoundException
+
+        await self.event_cache.set_event(event)
+        return event
 
     async def get_event_seats(self, event_id: int) -> list[EventSeatRead]:
         return await self.db.events_seats.get_relation_seat_and_event_seats_by_event_id(
