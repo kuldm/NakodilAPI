@@ -28,24 +28,29 @@ class EventsService(BaseService):
         return await self.db.events.get_all()
 
     async def get_event_by_id(self, event_id: int) -> EventRead:
+        # Пробуем забрать из кэша
         event_cached = await self.event_cache.get_event(event_id)
         if event_cached is not None:
             return event_cached
 
+        # Если в кэше нет, то применяя паттерн singleflight делаем lock для лидера и не грузим базу запросами
         try:
             async with self.redis_client.client.lock(
                 name=f"lock:event:{event_id}",
                 timeout=5,
                 blocking_timeout=3,
             ):
+                # ПРобуем ещё раз забрать из кэша
                 event = await self.event_cache.get_event(event_id)
                 if event is not None:
                     return event
-
+                # Если в кэше нет, то идём в базу и там получаем данные и греем кэш
                 event = await self._load_event(event_id)
                 return event
 
+        # если по истечении blocking_timeout секунд lock не освободиться то выбрасываем исключение
         except LockError:
+            # Но перед исключением проверим ещё раз кэш
             event = await self.event_cache.get_event(event_id)
             if event is not None:
                 return event
@@ -53,10 +58,12 @@ class EventsService(BaseService):
             raise EventLoadingTimeoutException
 
     async def _load_event(self, event_id: int) -> EventRead:
+        # идём в базу
         event = await self.db.events.get_one_or_none(id=event_id)
         if event is None:
             raise EventNotFoundException
 
+        # греем кэш
         await self.event_cache.set_event(event)
         return event
 
