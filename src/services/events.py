@@ -1,9 +1,15 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 
+from redis.exceptions import LockError
+
 # from config import settings
 from config import settings
-from exceptions import SeatsConflictException
+from exceptions import (
+    SeatsConflictException,
+    EventNotFoundException,
+    EventLoadingTimeoutException,
+)
 from infrastructure.api_connectors.schemas import (
     PaymentCalculateItemData,
     ProtectionCalculateItemData,
@@ -20,8 +26,51 @@ class EventsService(BaseService):
     async def get_all_events(self) -> list[EventRead]:
         return await self.db.events.get_all()
 
+    async def update_event_views(self, event_id: int, ip: str) -> None:
+        # Ставим в редис запрос конкретного ивента по ip и ttl 5 минут, чтобы запись просмотра не чаще 1 раза в 5 минут
+        is_unique = await self.event_cache.set_event_view_ip(event_id, ip)
+        if is_unique:
+            await self.event_views_worker.add_event_view(event_id)
+
     async def get_event_by_id(self, event_id: int) -> EventRead:
-        return await self.db.events.get_one_or_none(id=event_id)
+        # Пробуем забрать из кэша
+        event_cached = await self.event_cache.get_event(event_id)
+        if event_cached is not None:
+            return event_cached
+
+        # Если в кэше нет, то применяя паттерн singleflight делаем lock для лидера и не грузим базу запросами
+        try:
+            async with self.redis_client.client.lock(
+                name=f"lock:event:{event_id}",
+                timeout=5,
+                blocking_timeout=3,
+            ):
+                # ПРобуем ещё раз забрать из кэша
+                event = await self.event_cache.get_event(event_id)
+                if event is not None:
+                    return event
+                # Если в кэше нет, то идём в базу и там получаем данные и греем кэш
+                event = await self._load_event(event_id)
+                return event
+
+        # если по истечении blocking_timeout секунд lock не освободиться то выбрасываем исключение
+        except LockError:
+            # Но перед исключением проверим ещё раз кэш
+            event = await self.event_cache.get_event(event_id)
+            if event is not None:
+                return event
+
+            raise EventLoadingTimeoutException
+
+    async def _load_event(self, event_id: int) -> EventRead:
+        # идём в базу
+        event = await self.db.events.get_one_or_none(id=event_id)
+        if event is None:
+            raise EventNotFoundException
+
+        # греем кэш
+        await self.event_cache.set_event(event)
+        return event
 
     async def get_event_seats(self, event_id: int) -> list[EventSeatRead]:
         return await self.db.events_seats.get_relation_seat_and_event_seats_by_event_id(

@@ -10,7 +10,10 @@ from sqlalchemy.ext.asyncio import (
 
 from config import PostgresConfig
 from infrastructure.postgres.repositories.bookings import BookingsRepository
-from infrastructure.postgres.repositories.events import EventsRepository
+from infrastructure.postgres.repositories.events import (
+    EventsRepository,
+    EventViewsRepository,
+)
 from infrastructure.postgres.repositories.organizers import OrganizersRepository
 from infrastructure.postgres.repositories.seats import (
     SeatsRepository,
@@ -79,6 +82,10 @@ class DatabaseManager:
     @property
     def events(self) -> EventsRepository:
         return EventsRepository(self.session)
+
+    @property
+    def event_views(self) -> EventViewsRepository:
+        return EventViewsRepository(self.session)
 
     @property
     def organizers(self) -> OrganizersRepository:

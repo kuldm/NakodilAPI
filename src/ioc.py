@@ -11,16 +11,22 @@ from config import (
     BookingConfig,
     AppConfig,
     ConnectorsConfig,
+    RedisConfig,
+    EventViewsConfig,
 )
 
 # from db import async_session_maker
 from infrastructure.api_connectors.internal.payment import PaymentConnector
 from infrastructure.api_connectors.internal.protection import ProtectionConnector
+from infrastructure.concurrency.singleflight import Singleflight
+from infrastructure.workers.event_views import EventViewsWorker
+from infrastructure.redis.event_cache import EventCache
 from services.events import EventsService
 from services.organizers import OrganizersService
 from infrastructure.postgres.db_manager import PostgresClient, DatabaseManager
 from services.reports import JobService
 from services.seats import SeatsService, EventsSeatsService
+from src.infrastructure.redis.manager import RedisManager, create_redis_manager
 
 
 class ConfigProvider(Provider):
@@ -52,6 +58,14 @@ class ConfigProvider(Provider):
     def get_connectors_config(self, settings: Settings) -> ConnectorsConfig:
         return settings.connectors
 
+    @provide(scope=Scope.APP)
+    def get_redis_config(self, settings: Settings) -> RedisConfig:
+        return settings.redis
+
+    @provide(scope=Scope.APP)
+    def get_event_views_config(self, settings: Settings) -> EventViewsConfig:
+        return settings.event_views
+
 
 class PostgresProvider(Provider):
     @provide(scope=Scope.APP)
@@ -72,6 +86,40 @@ class PostgresProvider(Provider):
     ) -> AsyncIterator[DatabaseManager]:
         async with postgres.session() as db:
             yield db
+
+
+class RedisProvider(Provider):
+    @provide(scope=Scope.APP)
+    async def get_redis_manager(
+        self,
+        config: RedisConfig,
+    ) -> AsyncIterator[RedisManager]:
+        redis = create_redis_manager(config)
+
+        yield redis
+
+        await redis.close()
+
+
+class CacheProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_event_cache(
+        self,
+        redis: RedisManager,
+    ) -> EventCache:
+        return EventCache(redis)
+
+
+class SingleflightProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_singleflight(self) -> Singleflight:
+        return Singleflight()
+
+
+class EventViewsWorkerProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_singleflight(self, postgres: PostgresClient) -> EventViewsWorker:
+        return EventViewsWorker(postgres)
 
 
 class AppProvider(Provider):
@@ -116,20 +164,28 @@ class ServiceProvider(Provider):
         db: DatabaseManager,
         payment_connector: PaymentConnector,
         protection_connector: ProtectionConnector,
+        event_cache: EventCache,
+        redis_manager: RedisManager,
+        event_views_worker: EventViewsWorker,
     ) -> EventsService:
         return EventsService(
             db=db,
             payment_connector=payment_connector,
             protection_connector=protection_connector,
+            event_cache=event_cache,
+            redis_client=redis_manager,
+            event_views_worker=event_views_worker,
         )
 
     @provide(scope=Scope.REQUEST)
     def organizers_service(
         self,
         db: DatabaseManager,
+        event_cache: EventCache,
     ) -> OrganizersService:
         return OrganizersService(
             db=db,
+            event_cache=event_cache,
         )
 
     @provide(scope=Scope.REQUEST)
@@ -164,4 +220,8 @@ def create_container(settings: Settings):
         AppProvider(),
         ServiceProvider(),
         FastapiProvider(),
+        RedisProvider(),
+        CacheProvider(),
+        SingleflightProvider(),
+        EventViewsWorkerProvider(),
     )

@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dishka.integrations.fastapi import setup_dishka
 
 from api.lifespan import create_lifespan
+from api.middleware import TimingMiddleware
 from src.api import main_router
 from src.config import Settings
 from src.api.exception_handler import setup_exception_handler
@@ -30,6 +31,8 @@ def create_fastapi_app(
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    app.add_middleware(TimingMiddleware)
 
     setup_dishka(
         container=container,

@@ -1,7 +1,7 @@
 from typing import Annotated, List
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 
 from schemas.bookings import BookingCreate
 from schemas.events import EventRead
@@ -39,8 +39,10 @@ async def list_events(
 )
 async def get_event(
     event_id: int,
+    request: Request,
     service: FromDishka[EventsService],
 ):
+    await service.update_event_views(event_id, ip=request.client.host)
     return await service.get_event_by_id(event_id)
 
 
