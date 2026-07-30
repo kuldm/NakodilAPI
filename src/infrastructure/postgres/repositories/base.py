@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from sqlalchemy import select, update, insert
+from sqlalchemy import select, update, insert, delete
 
 from infrastructure.postgres.repositories.mappers.base import DataMapper
 
@@ -37,7 +37,7 @@ class BaseRepository:
         ]
 
     async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
-        """Добавляет новую запись и возвращает созданную запись."""
+        """Редактирует запись и возвращает её."""
         update_stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -56,3 +56,13 @@ class BaseRepository:
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
+
+    async def add_bulk(self, data: list[BaseModel]):
+        """Добавляет новую запись"""
+        add_data_stmt = insert(self.model).values([item.model_dump() for item in data])
+        await self.session.execute(add_data_stmt)
+
+    async def delete(self, **filter_by):
+        """Удаляет записи, соответствующие фильтру"""
+        delete_stmt = delete(self.model).filter_by(**filter_by)
+        await self.session.execute(delete_stmt)

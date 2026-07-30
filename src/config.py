@@ -4,6 +4,11 @@ from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class EventViewsConfig(BaseModel):
+    flush_interval: int
+    batch_size: int
+
+
 class RedisConfig(BaseModel):
     redis_url: str
 
@@ -64,6 +69,7 @@ class Settings(BaseSettings):
     report: ReportConfig
     connectors: ConnectorsConfig
     redis: RedisConfig
+    event_views: EventViewsConfig
 
     model_config = SettingsConfigDict(
         env_file=".env",

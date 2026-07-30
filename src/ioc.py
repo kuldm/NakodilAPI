@@ -12,12 +12,14 @@ from config import (
     AppConfig,
     ConnectorsConfig,
     RedisConfig,
+    EventViewsConfig,
 )
 
 # from db import async_session_maker
 from infrastructure.api_connectors.internal.payment import PaymentConnector
 from infrastructure.api_connectors.internal.protection import ProtectionConnector
 from infrastructure.concurrency.singleflight import Singleflight
+from infrastructure.workers.event_views import EventViewsWorker
 from infrastructure.redis.event_cache import EventCache
 from services.events import EventsService
 from services.organizers import OrganizersService
@@ -59,6 +61,10 @@ class ConfigProvider(Provider):
     @provide(scope=Scope.APP)
     def get_redis_config(self, settings: Settings) -> RedisConfig:
         return settings.redis
+
+    @provide(scope=Scope.APP)
+    def get_event_views_config(self, settings: Settings) -> EventViewsConfig:
+        return settings.event_views
 
 
 class PostgresProvider(Provider):
@@ -110,6 +116,12 @@ class SingleflightProvider(Provider):
         return Singleflight()
 
 
+class EventViewsWorkerProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_singleflight(self, postgres: PostgresClient) -> EventViewsWorker:
+        return EventViewsWorker(postgres)
+
+
 class AppProvider(Provider):
     # @provide(scope=Scope.REQUEST)
     # async def db(self) -> AsyncIterator[DBManager]:
@@ -154,6 +166,7 @@ class ServiceProvider(Provider):
         protection_connector: ProtectionConnector,
         event_cache: EventCache,
         redis_manager: RedisManager,
+        event_views_worker: EventViewsWorker,
     ) -> EventsService:
         return EventsService(
             db=db,
@@ -161,6 +174,7 @@ class ServiceProvider(Provider):
             protection_connector=protection_connector,
             event_cache=event_cache,
             redis_client=redis_manager,
+            event_views_worker=event_views_worker,
         )
 
     @provide(scope=Scope.REQUEST)
@@ -209,4 +223,5 @@ def create_container(settings: Settings):
         RedisProvider(),
         CacheProvider(),
         SingleflightProvider(),
+        EventViewsWorkerProvider(),
     )

@@ -29,3 +29,8 @@ class EventAdd(EventCreate):
     organizer_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class EventViews(BaseModel):
+    event_id: int
+    views_count: int

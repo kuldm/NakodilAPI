@@ -19,14 +19,14 @@ class EventCache:
 
         return EventRead.model_validate_json(value)
 
-    async def set_event(
-        self, event: EventRead, ttl: int | None = None
-    ) -> None:
+    async def set_event(self, event: EventRead, ttl: int | None = None) -> None:
         if ttl is None:
             ttl = random.randint(300, 360)
 
         await self._client.set(
-            self._get_event_key(event.id),
-            event.model_dump_json(),
-            ex=ttl
+            self._get_event_key(event.id), event.model_dump_json(), ex=ttl
         )
+
+    async def set_event_view_ip(self, event_id: int, ip: str) -> bool:
+        result = await self._client.set(f"view:{event_id}:{ip}", "1", nx=True, ex=300)
+        return bool(result)

@@ -15,7 +15,6 @@ from infrastructure.api_connectors.schemas import (
     ProtectionCalculateItemData,
 )
 from infrastructure.postgres.models.models import EventSeat, SeatStatus
-from infrastructure.redis.event_cache import EventCache
 from schemas.bookings import BookingCreate, BookingAdd, BookingPATCH, CheckoutBooking
 from schemas.events import EventRead
 from schemas.schemas import CheckoutResponse
@@ -26,6 +25,12 @@ from services.base import BaseService
 class EventsService(BaseService):
     async def get_all_events(self) -> list[EventRead]:
         return await self.db.events.get_all()
+
+    async def update_event_views(self, event_id: int, ip: str) -> None:
+        # Ставим в редис запрос конкретного ивента по ip и ttl 5 минут, чтобы запись просмотра не чаще 1 раза в 5 минут
+        is_unique = await self.event_cache.set_event_view_ip(event_id, ip)
+        if is_unique:
+            await self.event_views_worker.add_event_view(event_id)
 
     async def get_event_by_id(self, event_id: int) -> EventRead:
         # Пробуем забрать из кэша
